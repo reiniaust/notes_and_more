@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "142919885745",
+    "firebase_url": "https://notesandmore-943e9.firebaseio.com",
+    "project_id": "notesandmore-943e9",
+    "storage_bucket": "notesandmore-943e9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142919885745:android:eccadd1343c65493625390",
+        "android_client_info": {
+          "package_name": "com.example.notes_and_more"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "142919885745-6t4otasj7b8uo95ee0poqk3ecr7deohu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWvLmXsRcsRDv2k34pAMhkhkweRw6zAsg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "142919885745-6t4otasj7b8uo95ee0poqk3ecr7deohu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
