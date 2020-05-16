@@ -9,6 +9,7 @@ dependencies:
   firebase: ^5.0.0
   firebase_auth: ^0.14.0+5
   firebase_database: ^3.0.7
+  autocomplete_textfield: ^1.7.3
 
 dev_dependencies:
   flutter_test:

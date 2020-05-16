@@ -3,14 +3,16 @@ import '../services/authentication.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../models/entry.dart';
 import 'dart:async';
+import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.auth, this.userId, this.logoutCallback})
+  HomePage({Key key, this.auth, this.userId, this.userEmail, this.logoutCallback})
       : super(key: key);
 
   final BaseAuth auth;
   final VoidCallback logoutCallback;
   final String userId;
+  final String userEmail;
 
   @override
   State<StatefulWidget> createState() => new _HomePageState();
@@ -37,11 +39,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     _todoList = new List();
-    _todoQuery = _database
-        .reference()
-        .child("notesandmore-943e9")
-        .orderByChild("date");
-        //.equalTo(widget.userId);
+    _todoQuery =
+        _database.reference().child("notesandmore-943e9"); //.orderByChild("date").equalTo();
     _onTodoAddedSubscription = _todoQuery.onChildAdded.listen(onEntryAdded);
     _onTodoChangedSubscription =
         _todoQuery.onChildChanged.listen(onEntryChanged);
@@ -60,7 +59,8 @@ class _HomePageState extends State<HomePage> {
     });
 
     setState(() {
-      _todoList[_todoList.indexOf(oldEntry)] = Entry.fromSnapshot(event.snapshot);
+      _todoList[_todoList.indexOf(oldEntry)] =
+          Entry.fromSnapshot(event.snapshot);
       sortList();
     });
   }
@@ -68,14 +68,19 @@ class _HomePageState extends State<HomePage> {
   onEntryAdded(Event event) {
     setState(() {
       Entry e = Entry.fromSnapshot(event.snapshot);
+
       ///e.old = false;
-      _todoList.add(e);
-      sortList(); // neu nach Termin sortieren (13.5.)
+      if (e.userId == null || e.userId == widget.userId || e.toUser == widget.userEmail) {
+        _todoList.add(e);
+        sortList(); // neu nach Termin sortieren (13.5.)
+      }
     });
   }
 
   void sortList() {
-    _todoList.sort((a, b) => (a.completed.toString()+a.date).compareTo(b.completed.toString()+b.date)); // neu nach Termin sortieren (13.5.)
+    //_todoList = _todoList.where((e) => e.userId == widget.userId);
+    _todoList.sort((a, b) => (a.completed.toString() + a.date).compareTo(
+        b.completed.toString() + b.date)); // neu nach Termin sortieren (13.5.)
   }
 
   signOut() async {
@@ -124,61 +129,72 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  showAddOrEditDialog(BuildContext context, Entry entry, bool titleAndDate) async {
-    if(entry == null) { // wenn neuer Eintrag
-        _textEditingController.clear();
-        entry = Entry();
+  showAddOrEditDialog(
+      BuildContext context, Entry entry, bool titleAndDate) async {
+    if (entry == null) {
+      // wenn neuer Eintrag
+      _textEditingController.clear();
+      entry = Entry();
+    } else {
+      _textEditingController.text = entry.subject;
+      _dateEditingController.text = entry.date;
+      _prioEditingController.text = entry.prio;
+      _toUserEditingController.text = entry.toUser;
     }
-    else
-    {
-        _textEditingController.text = entry.subject;
-        _dateEditingController.text = entry.date;
-        _prioEditingController.text = entry.prio;
-        _toUserEditingController.text = entry.toUser;
-    }
+
+    final List<String> eMailList = [];
+    _todoList.forEach((e) {
+      if (e.toUser != null && !eMailList.contains(e.toUser)) {
+        eMailList.add(e.toUser);
+      }
+    });
+
     await showDialog<String>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            content: titleAndDate ? Column(
-              children: <Widget>[
-                Expanded(
-                  child: TextField(
-                    controller: _textEditingController,
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      labelText: 'Eintrag',
-                    ),
+            content: titleAndDate
+                ? Column(
+                    children: <Widget>[
+                      Expanded(
+                        child: TextField(
+                          controller: _textEditingController,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            labelText: 'Eintrag',
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: _dateEditingController,
+                          decoration: InputDecoration(
+                            labelText: 'Termin (JJJJ-MM-TT HH:MM)',
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Column(
+                    children: <Widget>[
+                      Expanded(
+                          child: SimpleAutoCompleteTextField(
+                        key: null,                          controller: _toUserEditingController,
+                          decoration: InputDecoration(
+                            labelText: 'Zuständig',
+                          ),
+                        suggestions: eMailList,
+                      )),
+                      Expanded(
+                        child: TextField(
+                          controller: _prioEditingController,
+                          decoration: InputDecoration(
+                            labelText: 'Priorität (z.B. hoch)',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _dateEditingController,
-                    decoration: InputDecoration(
-                      labelText: 'Termin (JJJJ-MM-TT HH:MM)',
-                    ),
-                  ),
-                ),
-              ],
-            ) : Column(children: <Widget>[
-                Expanded(
-                  child: TextField(
-                    controller: _toUserEditingController,
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      labelText: 'Zuständig',
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _prioEditingController,
-                    decoration: InputDecoration(
-                      labelText: 'Priorität (z.B. hoch)',
-                    ),
-                  ),
-                ),
-            ],),
             actions: <Widget>[
               new FlatButton(
                   child: const Text('Abbrechen'),
@@ -193,11 +209,10 @@ class _HomePageState extends State<HomePage> {
                     entry.prio = _prioEditingController.text.toString();
                     entry.completed = false;
                     entry.toUser = _toUserEditingController.text.toString();
-                    if(entry.key == null) { // wenn neuer Eintrag
+                    if (entry.key == null) {
+                      // wenn neuer Eintrag
                       addNewTodo(entry);
-                    }
-                    else
-                    {
+                    } else {
                       updateEntry(entry);
                     }
                     Navigator.pop(context);
@@ -223,11 +238,16 @@ class _HomePageState extends State<HomePage> {
               child: ListTile(
                 title: Text(
                   e.subject,
-                  style: TextStyle(fontWeight: _todoList[index].prio == 'hoch' ? FontWeight.bold : FontWeight.normal ),
+                  style: TextStyle(
+                      fontWeight: _todoList[index].prio == 'hoch'
+                          ? FontWeight.bold
+                          : FontWeight.normal),
                 ),
-                subtitle: Text(
-                  (e.date == null ? "" : e.date + " ") //+ e.toUser == null ? "" : e.toUser  // + _todoList[index].newBold?.toString()
-                ),
+                subtitle: Text((e.date == null
+                        ? ""
+                        : e.date +
+                            " ") //+ e.toUser == null ? "" : e.toUser  // + _todoList[index].newBold?.toString()
+                    ),
                 trailing: IconButton(
                     icon: (e.completed)
                         ? Icon(
@@ -243,7 +263,8 @@ class _HomePageState extends State<HomePage> {
                   showAddOrEditDialog(context, _todoList[index], true);
                 },
                 onLongPress: () {
-                  showAddOrEditDialog(context, _todoList[index], false); // Zuständige Person und Priorität eingeben
+                  showAddOrEditDialog(context, _todoList[index],
+                      false); // Zuständige Person und Priorität eingeben
                 },
               ),
             );
