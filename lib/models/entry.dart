@@ -7,21 +7,20 @@ class Entry {
   String userId;
   String date;
   String prio;
+  String fromUser;
   String toUser;
-  bool newBold = false;
 
   Entry();
   //Entry(this.subject, this.userId, this.completed, this.date, this.prio, this.toUser);
 
   Entry.fromSnapshot(DataSnapshot snapshot) :
     key = snapshot.key,
-    userId = snapshot.value["userId"],
     subject = snapshot.value["subject"],
     completed = snapshot.value["completed"],
     date = snapshot.value["date"],
     prio = snapshot.value["prio"],
-    toUser = snapshot.value["toUser"],
-    newBold = true;
+    fromUser = snapshot.value["fromUser"],
+    toUser = snapshot.value["toUser"];
 
   toJson() {
     return {
@@ -30,6 +29,7 @@ class Entry {
       "completed": completed,
       "date": date,
       "prio": prio,
+      "fromUser": fromUser,
       "toUser": toUser,
     };
   }

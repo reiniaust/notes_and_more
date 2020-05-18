@@ -6,7 +6,8 @@ import 'dart:async';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.auth, this.userId, this.userEmail, this.logoutCallback})
+  HomePage(
+      {Key key, this.auth, this.userId, this.userEmail, this.logoutCallback})
       : super(key: key);
 
   final BaseAuth auth;
@@ -39,8 +40,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     _todoList = new List();
-    _todoQuery =
-        _database.reference().child("notesandmore-943e9"); //.orderByChild("date").equalTo();
+    _todoQuery = _database
+        .reference()
+        .child("notesandmore-943e9"); //.orderByChild("date").equalTo();
     _onTodoAddedSubscription = _todoQuery.onChildAdded.listen(onEntryAdded);
     _onTodoChangedSubscription =
         _todoQuery.onChildChanged.listen(onEntryChanged);
@@ -69,16 +71,17 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       Entry e = Entry.fromSnapshot(event.snapshot);
 
-      ///e.old = false;
-      if (e.userId == null || e.userId == widget.userId || e.toUser == widget.userEmail) {
+      if (e.userId == widget.userId ||
+          e.fromUser == widget.userEmail ||
+          e.toUser == widget.userEmail) {
         _todoList.add(e);
-        sortList(); // neu nach Termin sortieren (13.5.)
+        sortList();
       }
     });
   }
 
+  // Nach Unerledigt+Termin sortieren
   void sortList() {
-    //_todoList = _todoList.where((e) => e.userId == widget.userId);
     _todoList.sort((a, b) => (a.completed.toString() + a.date).compareTo(
         b.completed.toString() + b.date)); // neu nach Termin sortieren (13.5.)
   }
@@ -135,6 +138,7 @@ class _HomePageState extends State<HomePage> {
       // wenn neuer Eintrag
       _textEditingController.clear();
       entry = Entry();
+      entry.fromUser = widget.userEmail;
     } else {
       _textEditingController.text = entry.subject;
       _dateEditingController.text = entry.date;
@@ -179,10 +183,16 @@ class _HomePageState extends State<HomePage> {
                     children: <Widget>[
                       Expanded(
                           child: SimpleAutoCompleteTextField(
-                        key: null,                          controller: _toUserEditingController,
-                          decoration: InputDecoration(
-                            labelText: 'Zuständig',
-                          ),
+                        key: null,
+                        controller: _toUserEditingController,
+                        decoration: InputDecoration(
+                          labelText: 'Zuständig',
+                        ),
+                        onFocusChanged: (hasfocus) {
+                          if (hasfocus) {
+                            _toUserEditingController.text = "";
+                          }
+                        }, 
                         suggestions: eMailList,
                       )),
                       Expanded(
@@ -243,10 +253,14 @@ class _HomePageState extends State<HomePage> {
                           ? FontWeight.bold
                           : FontWeight.normal),
                 ),
-                subtitle: Text((e.date == null
-                        ? ""
-                        : e.date +
-                            " ") //+ e.toUser == null ? "" : e.toUser  // + _todoList[index].newBold?.toString()
+                subtitle: Text(
+                      (e.fromUser != null && e.fromUser != widget.userEmail
+                        ? "von: " + e.fromUser + "  "
+                        : "") +
+                      (e.toUser != "" && e.toUser != widget.userEmail
+                        ? "an: " + e.toUser + "  "
+                        : "") + 
+                      (e.date.isEmpty ? "" : "Termin: " + e.date + " ")
                     ),
                 trailing: IconButton(
                     icon: (e.completed)
