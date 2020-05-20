@@ -21,10 +21,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Entry> _todoList;
+  List<Entry> _searchList;
 
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
+  final _searchEditingController = TextEditingController();
   final _textEditingController = TextEditingController();
   final _dateEditingController = TextEditingController();
   final _prioEditingController = TextEditingController();
@@ -84,6 +86,7 @@ class _HomePageState extends State<HomePage> {
   void sortList() {
     _todoList.sort((a, b) => (a.completed.toString() + a.date).compareTo(
         b.completed.toString() + b.date)); // neu nach Termin sortieren (13.5.)
+    _searchList = _todoList;
   }
 
   signOut() async {
@@ -128,6 +131,7 @@ class _HomePageState extends State<HomePage> {
       print("$entryId gelöscht");
       setState(() {
         _todoList.removeAt(index);
+        _searchList = _todoList;
       });
     });
   }
@@ -192,7 +196,7 @@ class _HomePageState extends State<HomePage> {
                           if (hasfocus) {
                             _toUserEditingController.text = "";
                           }
-                        }, 
+                        },
                         suggestions: eMailList,
                       )),
                       Expanded(
@@ -236,9 +240,9 @@ class _HomePageState extends State<HomePage> {
     if (_todoList.length > 0) {
       return ListView.builder(
           shrinkWrap: true,
-          itemCount: _todoList.length,
+          itemCount: _searchList.length,
           itemBuilder: (BuildContext context, int index) {
-            Entry e = _todoList[index];
+            Entry e = _searchList[index];
             return Dismissible(
               key: Key(e.key),
               background: Container(color: Colors.red),
@@ -249,19 +253,18 @@ class _HomePageState extends State<HomePage> {
                 title: Text(
                   e.subject,
                   style: TextStyle(
-                      fontWeight: _todoList[index].prio == 'hoch'
+                      fontWeight: e.prio == 'hoch'
                           ? FontWeight.bold
                           : FontWeight.normal),
                 ),
                 subtitle: Text(
-                      (e.fromUser != null && e.fromUser != widget.userEmail
-                        ? "von: " + e.fromUser + "  "
-                        : "") +
-                      (e.toUser != "" && e.toUser != widget.userEmail
-                        ? "an: " + e.toUser + "  "
-                        : "") + 
-                      (e.date.isEmpty ? "" : "Termin: " + e.date + " ")
-                    ),
+                    (e.fromUser != null && e.fromUser != widget.userEmail
+                            ? "von: " + e.fromUser + "  "
+                            : "") +
+                        (e.toUser != "" && e.toUser != widget.userEmail
+                            ? "an: " + e.toUser + "  "
+                            : "") +
+                        (e.date.isEmpty ? "" : "Termin: " + e.date + " ")),
                 trailing: IconButton(
                     icon: (e.completed)
                         ? Icon(
@@ -270,14 +273,14 @@ class _HomePageState extends State<HomePage> {
                           )
                         : Icon(Icons.done, color: Colors.grey),
                     onPressed: () {
-                      _todoList[index].completed = !_todoList[index].completed;
-                      updateEntry(_todoList[index]);
+                      e.completed = !e.completed;
+                      updateEntry(e);
                     }),
                 onTap: () {
-                  showAddOrEditDialog(context, _todoList[index], true);
+                  showAddOrEditDialog(context, e, true);
                 },
                 onLongPress: () {
-                  showAddOrEditDialog(context, _todoList[index],
+                  showAddOrEditDialog(context, e,
                       false); // Zuständige Person und Priorität eingeben
                 },
               ),
@@ -297,7 +300,27 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text('Notes & More'),
+          title: new TextField(
+            controller: _searchEditingController,
+            decoration: InputDecoration(
+              labelText: 'Notes & More',
+              prefixIcon: Icon(Icons.search),
+              /*
+              suffixIcon: IconButton(
+                  icon: Icon(Icons.remove),
+                  onPressed: () {
+                    _searchEditingController.clear();
+                  }),*/
+            ),
+            onChanged: (s) {
+              setState(() {
+                _searchList = _todoList
+                    .where((e) =>
+                        e.subject.toUpperCase().contains(s.toUpperCase()))
+                    .toList();
+              });
+            },
+          ), //
           actions: <Widget>[
             new FlatButton(
                 child: new Text('Abmelden',
