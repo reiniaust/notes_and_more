@@ -27,6 +27,7 @@ class _RootPageState extends State<RootPage> {
   void initState() {
     super.initState();
     widget.auth.getCurrentUser().then((user) {
+    print("2");
       setState(() {
         if (user != null) {
           _userId = user?.uid;
@@ -68,6 +69,8 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
+    print(authStatus.toString());
+
     switch (authStatus) {
       case AuthStatus.NOT_DETERMINED:
         return buildWaitingScreen();

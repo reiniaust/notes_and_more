@@ -6,8 +6,9 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^0.1.2
-  firebase: ^5.0.0
-  firebase_auth: ^0.14.0+5
+  firebase: ^7.0.0
+  firebase_auth:
+  firebase_auth_web:
   firebase_database: ^3.0.7
   autocomplete_textfield: ^1.7.3
 

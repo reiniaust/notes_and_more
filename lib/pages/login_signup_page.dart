@@ -89,6 +89,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
 
   @override
   Widget build(BuildContext context) {
+  print("build");
     return new Scaffold(
         appBar: new AppBar(
           title: new Text('Notes & More'),
@@ -112,6 +113,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
   }
 
   Widget _showForm() {
+    print("_showForm");
     return new Container(
         padding: EdgeInsets.all(16.0),
         child: new Form(

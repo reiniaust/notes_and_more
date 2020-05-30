@@ -2,11 +2,11 @@ import 'package:firebase_database/firebase_database.dart';
 
 class Entry {
   String key;
-  String subject;
-  bool completed;
+  String subject = "";
+  bool completed = false;
   String userId;
-  String date;
-  String prio;
+  String date = "";
+  String prio = "";
   String fromUser;
   String toUser;
 

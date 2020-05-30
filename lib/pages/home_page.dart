@@ -58,35 +58,41 @@ class _HomePageState extends State<HomePage> {
   }
 
   onEntryChanged(Event event) {
+    Entry e = Entry.fromSnapshot(event.snapshot);
+
     var oldEntry = _todoList.singleWhere((entry) {
-      return entry.key == event.snapshot.key;
+      return entry.key == e.key;
     });
 
-    setState(() {
+    if (oldEntry == null &&
+        e.toUser.toUpperCase() == widget.userEmail.toUpperCase()) {
+      _todoList.add(e);
+    } else {
       _todoList[_todoList.indexOf(oldEntry)] =
           Entry.fromSnapshot(event.snapshot);
-      sortList();
-    });
+    }
+    sortList();
   }
 
   onEntryAdded(Event event) {
-    setState(() {
-      Entry e = Entry.fromSnapshot(event.snapshot);
+    Entry e = Entry.fromSnapshot(event.snapshot);
 
-      if (e.userId == widget.userId ||
-          e.fromUser == widget.userEmail ||
-          e.toUser == widget.userEmail) {
-        _todoList.add(e);
-        sortList();
-      }
-    });
+    if (e.userId == widget.userId ||
+        e.fromUser == widget.userEmail ||
+        e.toUser.toUpperCase() == widget.userEmail.toUpperCase()) {
+      _todoList.add(e);
+      sortList();
+    }
   }
 
   // Nach Unerledigt+Termin sortieren
   void sortList() {
-    _todoList.sort((a, b) => (a.completed.toString() + a.date).compareTo(
-        b.completed.toString() + b.date)); // neu nach Termin sortieren (13.5.)
-    _searchList = _todoList;
+    //_todoList = _todoList.where((e) => e?.fromUser == widget.userEmail || e.toUser.toUpperCase() == widget.userEmail.toUpperCase());
+    _todoList.sort((a, b) => (a.completed.toString() + a.date + " " + a.subject)
+        .compareTo(b.completed.toString() + b.date + " " + b.subject));
+    setState(() {
+      _searchList = _todoList;
+    });
   }
 
   signOut() async {
@@ -140,15 +146,19 @@ class _HomePageState extends State<HomePage> {
       BuildContext context, Entry entry, bool titleAndDate) async {
     if (entry == null) {
       // wenn neuer Eintrag
-      _textEditingController.clear();
       entry = Entry();
+      /*
+      if (_textEditingController.text.contains(":")) {
+        entry.subject = _textEditingController.text.split(":")[0] + ": ";
+      }
+      */
       entry.fromUser = widget.userEmail;
-    } else {
-      _textEditingController.text = entry.subject;
-      _dateEditingController.text = entry.date;
-      _prioEditingController.text = entry.prio;
-      _toUserEditingController.text = entry.toUser;
+      entry.toUser = widget.userEmail;
     }
+    _textEditingController.text = entry.subject;
+    _dateEditingController.text = entry.date;
+    _prioEditingController.text = entry.prio;
+    _toUserEditingController.text = entry.toUser;
 
     final List<String> eMailList = [];
     _todoList.forEach((e) {
@@ -174,18 +184,6 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       Expanded(
-                        child: TextField(
-                          controller: _dateEditingController,
-                          decoration: InputDecoration(
-                            labelText: 'Termin (JJJJ-MM-TT HH:MM)',
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : Column(
-                    children: <Widget>[
-                      Expanded(
                           child: SimpleAutoCompleteTextField(
                         key: null,
                         controller: _toUserEditingController,
@@ -199,6 +197,18 @@ class _HomePageState extends State<HomePage> {
                         },
                         suggestions: eMailList,
                       )),
+                    ],
+                  )
+                : Column(
+                    children: <Widget>[
+                      Expanded(
+                        child: TextField(
+                          controller: _dateEditingController,
+                          decoration: InputDecoration(
+                            labelText: 'Termin (JJJJ-MM-TT HH:MM)',
+                          ),
+                        ),
+                      ),
                       Expanded(
                         child: TextField(
                           controller: _prioEditingController,
@@ -253,9 +263,9 @@ class _HomePageState extends State<HomePage> {
                 title: Text(
                   e.subject,
                   style: TextStyle(
-                      fontWeight: e.prio == 'hoch'
-                          ? FontWeight.bold
-                          : FontWeight.normal),
+                      color: e.prio == 'hoch'
+                          ? Colors.red
+                          : Colors.black),
                 ),
                 subtitle: Text(
                     (e.fromUser != null && e.fromUser != widget.userEmail
