@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:notes_and_more/pages/edit_page.dart';
 import '../services/authentication.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../models/entry.dart';
 import 'dart:async';
-import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 
 class HomePage extends StatefulWidget {
   HomePage(
@@ -22,15 +22,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<Entry> _todoList;
   List<Entry> _searchList;
+  final List<String> _eMailList = [];
 
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   final _searchEditingController = TextEditingController();
-  final _textEditingController = TextEditingController();
-  final _dateEditingController = TextEditingController();
-  final _prioEditingController = TextEditingController();
-  final _toUserEditingController = TextEditingController();
   //DateTime _dateInput;
   StreamSubscription<Event> _onTodoAddedSubscription;
   StreamSubscription<Event> _onTodoChangedSubscription;
@@ -105,7 +102,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   //addNewTodo(String subject, String date, String prio) {
-  addNewTodo(Entry entry) {
+  addNewEntry(Entry entry) {
+    print("hallo");
     if (entry.subject.length > 0) {
       //Entry entry = new Entry(subject.toString(), widget.userId, false, date, prio);
       _database
@@ -142,112 +140,15 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  showAddOrEditDialog(
-      BuildContext context, Entry entry, bool titleAndDate) async {
-    if (entry == null) {
-      // wenn neuer Eintrag
-      entry = Entry();
-      /*
-      if (_textEditingController.text.contains(":")) {
-        entry.subject = _textEditingController.text.split(":")[0] + ": ";
-      }
-      */
-      entry.fromUser = widget.userEmail;
-      entry.toUser = widget.userEmail;
-    }
-    _textEditingController.text = entry.subject;
-    _dateEditingController.text = entry.date;
-    _prioEditingController.text = entry.prio;
-    _toUserEditingController.text = entry.toUser;
-
-    final List<String> eMailList = [];
-    _todoList.forEach((e) {
-      if (e.toUser != null && !eMailList.contains(e.toUser)) {
-        eMailList.add(e.toUser);
-      }
-    });
-
-    await showDialog<String>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: titleAndDate
-                ? Column(
-                    children: <Widget>[
-                      Expanded(
-                        child: TextField(
-                          controller: _textEditingController,
-                          autofocus: true,
-                          decoration: InputDecoration(
-                            labelText: 'Eintrag',
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                          child: SimpleAutoCompleteTextField(
-                        key: null,
-                        controller: _toUserEditingController,
-                        decoration: InputDecoration(
-                          labelText: 'Zuständig',
-                        ),
-                        onFocusChanged: (hasfocus) {
-                          if (hasfocus) {
-                            _toUserEditingController.text = "";
-                          }
-                        },
-                        suggestions: eMailList,
-                      )),
-                    ],
-                  )
-                : Column(
-                    children: <Widget>[
-                      Expanded(
-                        child: TextField(
-                          controller: _dateEditingController,
-                          decoration: InputDecoration(
-                            labelText: 'Termin (JJJJ-MM-TT HH:MM)',
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: _prioEditingController,
-                          decoration: InputDecoration(
-                            labelText: 'Priorität (z.B. hoch)',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-            actions: <Widget>[
-              new FlatButton(
-                  child: const Text('Abbrechen'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-              new FlatButton(
-                  child: const Text('Speichern'),
-                  onPressed: () {
-                    entry.subject = _textEditingController.text.toString();
-                    entry.date = _dateEditingController.text.toString();
-                    entry.prio = _prioEditingController.text.toString();
-                    entry.completed = false;
-                    entry.toUser = _toUserEditingController.text.toString();
-                    if (entry.key == null) {
-                      // wenn neuer Eintrag
-                      addNewTodo(entry);
-                    } else {
-                      updateEntry(entry);
-                    }
-                    Navigator.pop(context);
-                  })
-            ],
-          );
-        });
-  }
 
   Widget showTodoList() {
     if (_todoList.length > 0) {
+      _todoList.forEach((e) {
+        if (e.toUser != null && !_eMailList.contains(e.toUser)) {
+          _eMailList.add(e.toUser);
+        }
+      });
+
       return ListView.builder(
           shrinkWrap: true,
           itemCount: _searchList.length,
@@ -263,9 +164,7 @@ class _HomePageState extends State<HomePage> {
                 title: Text(
                   e.subject,
                   style: TextStyle(
-                      color: e.prio == 'hoch'
-                          ? Colors.red
-                          : Colors.black),
+                      color: e.prio == 'hoch' ? Colors.red : Colors.black),
                 ),
                 subtitle: Text(
                     (e.fromUser != null && e.fromUser != widget.userEmail
@@ -287,12 +186,21 @@ class _HomePageState extends State<HomePage> {
                       updateEntry(e);
                     }),
                 onTap: () {
-                  showAddOrEditDialog(context, e, true);
+                  // Zur Ändern-Seite
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            EditPage(e, _eMailList, updateEntry)),
+                  );
+                  //showAddOrEditDialog(context, e, true);
                 },
+                /*
                 onLongPress: () {
                   showAddOrEditDialog(context, e,
                       false); // Zuständige Person und Priorität eingeben
                 },
+                */
               ),
             );
           });
@@ -310,7 +218,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new TextField(
+          title: new TextField( // Suchen
             controller: _searchEditingController,
             decoration: InputDecoration(
               labelText: 'Notes & More',
@@ -322,6 +230,7 @@ class _HomePageState extends State<HomePage> {
                     _searchEditingController.clear();
                   }),*/
             ),
+            style: TextStyle(color: Colors.white),
             onChanged: (s) {
               setState(() {
                 _searchList = _todoList
@@ -341,7 +250,17 @@ class _HomePageState extends State<HomePage> {
         body: showTodoList(),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            showAddOrEditDialog(context, null, true);
+            Entry entry = Entry();
+            entry.subject = "";
+            entry.fromUser = widget.userEmail;
+            entry.toUser = widget.userEmail;
+            // zur Hinzufügen-Seite
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => EditPage(entry, _eMailList, addNewEntry)),
+            );
+            //showAddOrEditDialog(context, null, true);
           },
           tooltip: 'Hinzufügen',
           child: Icon(Icons.add),
