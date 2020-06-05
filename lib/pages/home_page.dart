@@ -23,6 +23,7 @@ class _HomePageState extends State<HomePage> {
   List<Entry> _todoList;
   List<Entry> _searchList;
   final List<String> _eMailList = [];
+  final List<String> _stateList = ["Ungelesen", "Offen", "Erledigt", "Verworfen"];
 
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -101,11 +102,9 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  //addNewTodo(String subject, String date, String prio) {
   addNewEntry(Entry entry) {
     print("hallo");
     if (entry.subject.length > 0) {
-      //Entry entry = new Entry(subject.toString(), widget.userId, false, date, prio);
       _database
           .reference()
           .child("notesandmore-943e9")
@@ -173,7 +172,9 @@ class _HomePageState extends State<HomePage> {
                         (e.toUser != "" && e.toUser != widget.userEmail
                             ? "an: " + e.toUser + "  "
                             : "") +
-                        (e.date.isEmpty ? "" : "Termin: " + e.date + " ")),
+                        (e.date.isEmpty ? "" : "Termin: " + e.date + " ") +
+                        (e.state.isEmpty ? "" : e.state + " ")
+                    ),
                 trailing: IconButton(
                     icon: (e.completed)
                         ? Icon(
@@ -191,7 +192,7 @@ class _HomePageState extends State<HomePage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            EditPage(e, _eMailList, updateEntry)),
+                            EditPage(e, _eMailList, _stateList, updateEntry)),
                   );
                   //showAddOrEditDialog(context, e, true);
                 },
@@ -258,7 +259,7 @@ class _HomePageState extends State<HomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => EditPage(entry, _eMailList, addNewEntry)),
+                  builder: (context) => EditPage(entry, _eMailList, _stateList, addNewEntry)),
             );
             //showAddOrEditDialog(context, null, true);
           },
