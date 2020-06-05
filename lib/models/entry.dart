@@ -9,9 +9,9 @@ class Entry {
   String prio = "";
   String fromUser;
   String toUser;
-  String state; // Status für offen, erledigt usw.
 
   Entry();
+  //Entry(this.subject, this.userId, this.completed, this.date, this.prio, this.toUser);
 
   Entry.fromSnapshot(DataSnapshot snapshot) :
     key = snapshot.key,
@@ -20,8 +20,7 @@ class Entry {
     date = snapshot.value["date"],
     prio = snapshot.value["prio"],
     fromUser = snapshot.value["fromUser"],
-    toUser = snapshot.value["toUser"],
-    state = snapshot.value["state"];
+    toUser = snapshot.value["toUser"];
 
   toJson() {
     return {
@@ -32,7 +31,6 @@ class Entry {
       "prio": prio,
       "fromUser": fromUser,
       "toUser": toUser,
-      "state": state,
     };
   }
 }

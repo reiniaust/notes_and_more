@@ -25,11 +25,14 @@ class _HomePageState extends State<HomePage> {
 <<<<<<< HEAD
 <<<<<<< HEAD
   final List<String> _eMailList = [];
+<<<<<<< HEAD
   final List<String> _stateList = ["Ungelesen", "Offen", "Erledigt", "Verworfen"];
 =======
 >>>>>>> parent of f607099... Extra Seite zum Editieren (Hinzufügen und Ändern)
 =======
 >>>>>>> parent of f607099... Extra Seite zum Editieren (Hinzufügen und Ändern)
+=======
+>>>>>>> parent of 1c5b28e... Termin/Datums-Eingabe mit Datepicker; Status-Feld state
 
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -114,6 +117,10 @@ class _HomePageState extends State<HomePage> {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+  //addNewTodo(String subject, String date, String prio) {
+>>>>>>> parent of 1c5b28e... Termin/Datums-Eingabe mit Datepicker; Status-Feld state
   addNewEntry(Entry entry) {
     print("hallo");
 =======
@@ -125,6 +132,7 @@ class _HomePageState extends State<HomePage> {
   addNewTodo(Entry entry) {
 >>>>>>> parent of f607099... Extra Seite zum Editieren (Hinzufügen und Ändern)
     if (entry.subject.length > 0) {
+      //Entry entry = new Entry(subject.toString(), widget.userId, false, date, prio);
       _database
           .reference()
           .child("notesandmore-943e9")
@@ -291,9 +299,7 @@ class _HomePageState extends State<HomePage> {
                         (e.toUser != "" && e.toUser != widget.userEmail
                             ? "an: " + e.toUser + "  "
                             : "") +
-                        (e.date.isEmpty ? "" : "Termin: " + e.date + " ") +
-                        (e.state.isEmpty ? "" : e.state + " ")
-                    ),
+                        (e.date.isEmpty ? "" : "Termin: " + e.date + " ")),
                 trailing: IconButton(
                     icon: (e.completed)
                         ? Icon(
@@ -313,7 +319,7 @@ class _HomePageState extends State<HomePage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            EditPage(e, _eMailList, _stateList, updateEntry)),
+                            EditPage(e, _eMailList, updateEntry)),
                   );
                   //showAddOrEditDialog(context, e, true);
 =======
@@ -385,7 +391,7 @@ class _HomePageState extends State<HomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => EditPage(entry, _eMailList, _stateList, addNewEntry)),
+                  builder: (context) => EditPage(entry, _eMailList, addNewEntry)),
             );
             //showAddOrEditDialog(context, null, true);
 =======
