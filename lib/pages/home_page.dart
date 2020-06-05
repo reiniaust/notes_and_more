@@ -23,8 +23,11 @@ class _HomePageState extends State<HomePage> {
   List<Entry> _todoList;
   List<Entry> _searchList;
 <<<<<<< HEAD
+<<<<<<< HEAD
   final List<String> _eMailList = [];
   final List<String> _stateList = ["Ungelesen", "Offen", "Erledigt", "Verworfen"];
+=======
+>>>>>>> parent of f607099... Extra Seite zum Editieren (Hinzufügen und Ändern)
 =======
 >>>>>>> parent of f607099... Extra Seite zum Editieren (Hinzufügen und Ändern)
 
@@ -110,8 +113,13 @@ class _HomePageState extends State<HomePage> {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   addNewEntry(Entry entry) {
     print("hallo");
+=======
+  //addNewTodo(String subject, String date, String prio) {
+  addNewTodo(Entry entry) {
+>>>>>>> parent of f607099... Extra Seite zum Editieren (Hinzufügen und Ändern)
 =======
   //addNewTodo(String subject, String date, String prio) {
   addNewTodo(Entry entry) {
@@ -299,6 +307,7 @@ class _HomePageState extends State<HomePage> {
                     }),
                 onTap: () {
 <<<<<<< HEAD
+<<<<<<< HEAD
                   // Zur Ändern-Seite
                   Navigator.push(
                     context,
@@ -307,6 +316,9 @@ class _HomePageState extends State<HomePage> {
                             EditPage(e, _eMailList, _stateList, updateEntry)),
                   );
                   //showAddOrEditDialog(context, e, true);
+=======
+                  showAddOrEditDialog(context, e, true);
+>>>>>>> parent of f607099... Extra Seite zum Editieren (Hinzufügen und Ändern)
 =======
                   showAddOrEditDialog(context, e, true);
 >>>>>>> parent of f607099... Extra Seite zum Editieren (Hinzufügen und Ändern)
@@ -364,6 +376,7 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
 <<<<<<< HEAD
+<<<<<<< HEAD
             Entry entry = Entry();
             entry.subject = "";
             entry.fromUser = widget.userEmail;
@@ -375,6 +388,9 @@ class _HomePageState extends State<HomePage> {
                   builder: (context) => EditPage(entry, _eMailList, _stateList, addNewEntry)),
             );
             //showAddOrEditDialog(context, null, true);
+=======
+            showAddOrEditDialog(context, null, true);
+>>>>>>> parent of f607099... Extra Seite zum Editieren (Hinzufügen und Ändern)
 =======
             showAddOrEditDialog(context, null, true);
 >>>>>>> parent of f607099... Extra Seite zum Editieren (Hinzufügen und Ändern)
