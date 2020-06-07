@@ -11,7 +11,8 @@ dependencies:
   firebase_auth_web:
   firebase_database: ^3.0.7
   autocomplete_textfield: ^1.7.3
-
+  intl: ^0.16.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
