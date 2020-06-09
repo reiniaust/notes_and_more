@@ -173,7 +173,7 @@ class _HomePageState extends State<HomePage> {
                             ? "an: " + e.toUser + "  "
                             : "") +
                         (e.date.isEmpty ? "" : "Termin: " + e.date + " ") +
-                        (e.state.isEmpty ? "" : e.state + " ")
+                        (e.state == null ? "" : e.state + " ")
                     ),
                 trailing: IconButton(
                     icon: (e.completed)
